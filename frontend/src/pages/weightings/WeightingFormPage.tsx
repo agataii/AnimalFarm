@@ -19,7 +19,11 @@ const schema = z.object({
   date: z.string().min(1, 'Date is required'),
   weightKg: z
     .union([z.string(), z.number()])
-    .transform((v) => (v === '' || v === undefined ? NaN : Number(v)))
+    .transform((v) => {
+      if (v === '' || v === undefined) return NaN;
+      const normalized = typeof v === 'string' ? v.replace(',', '.') : v;
+      return Number(normalized);
+    })
     .pipe(z.number().positive({ message: 'Weight must be greater than 0' })),
 });
 
@@ -62,10 +66,15 @@ export default function WeightingFormPage() {
   }, [existing, reset]);
 
   const mutation = useMutation({
-    mutationFn: (data: FormData) =>
-      isEdit
-        ? weightingsApi.update(Number(id), data)
-        : weightingsApi.create(data),
+    mutationFn: (data: FormData) => {
+      const payload = {
+        ...data,
+        date: new Date(data.date).toISOString(),
+      };
+      return isEdit
+        ? weightingsApi.update(Number(id), payload)
+        : weightingsApi.create(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weightings'] });
       navigate('/weightings');

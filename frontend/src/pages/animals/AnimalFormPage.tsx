@@ -80,7 +80,7 @@ export default function AnimalFormPage() {
         inventoryNumber: data.inventoryNumber,
         gender: data.gender,
         name: data.name,
-        arrivalDate: data.arrivalDate,
+        arrivalDate: new Date(data.arrivalDate).toISOString(),
         arrivalAgeMonths: data.arrivalAgeMonths,
         breedId: data.breedId,
         parentAnimalId: data.parentAnimalId ? Number(data.parentAnimalId) : null,
